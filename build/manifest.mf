@@ -1,0 +1,6 @@
+MIDlet-1: HelloWorld, , eu.kratochvil.rtm.nokia.HelloWorld
+MIDlet-Vendor: Vendor
+MIDlet-Name: nokiartm
+MIDlet-Version: 1.0
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.1
