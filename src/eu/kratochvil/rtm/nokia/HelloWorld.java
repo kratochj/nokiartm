@@ -4,6 +4,7 @@ import com.sun.lwuit.*;
 import com.sun.lwuit.events.*;
 import com.sun.lwuit.impl.midp.VKBImplementationFactory;
 import com.sun.lwuit.layouts.BorderLayout;
+import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.util.Log;
 import javax.microedition.midlet.*;
 
@@ -40,24 +41,26 @@ public class HelloWorld extends MIDlet  implements ActionListener {
             } catch(java.io.IOException err) {
                  err.printStackTrace();
             }
-            Settings settings = new Settings();
-            settings.show();
+
+            form = new Form("Remmember The Milk - Dashboard");
+            form.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+
+
+            form.addComponent(new Label("Test"));
+
+            form.addCommand(new Command("Settings") {
+                    public void actionPerformed(ActionEvent evt) {
+                        Settings settings = new Settings();
+                        settings.show();
+                    }
+
+            });
+
+            form.show();
+
         }
 
 
-
-//        Form mainForm = new Form("Hello, LWUIT!");
-//        mainForm.setLayout(new BorderLayout());
-//
-//        TabbedPane tabbedPane = new TabbedPane(TabbedPane.TOP);
-//        tabbedPane.addTab("Tab 1", new Label("I am a TabbedPane!"));
-//        tabbedPane.addTab("Tab 2", new Label("Tab number 2"));
-//
-//        mainForm.addComponent(BorderLayout.NORTH, tabbedPane);
-//
-//        mainForm.show();
-        Settings settings = new Settings();
-        settings.show();
     }
 
     public void pauseApp() {
