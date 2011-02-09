@@ -5,6 +5,7 @@ import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Display;
+import com.sun.lwuit.Font;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
@@ -74,7 +75,6 @@ public class MainForm extends Form implements FocusListener {
             showMainForm(false);
         }
     };
-
     static Command settingsCommand = new Command("Settings") {
 
         public void actionPerformed(ActionEvent ev) {
@@ -83,6 +83,7 @@ public class MainForm extends Form implements FocusListener {
             settings.show();
         }
     };
+    private String menuFontName;
 
     private MainForm() {
         this("Form");
@@ -186,7 +187,10 @@ public class MainForm extends Form implements FocusListener {
 
     static void initAndShowMainForm() throws Exception {
 
-        final MainForm mainForm = new MainForm();
+        final MainForm mainForm = new MainForm("Dashboard");
+
+        mainForm.setMenuFont();
+
         final int width = Display.getInstance().getDisplayWidth();
 
         mainForm.addCommand(exitCommand);
@@ -304,6 +308,48 @@ public class MainForm extends Form implements FocusListener {
         final int bottom = h / 100 * 10;
         final int side = w / 100 * 20;
         return menu.show(top, bottom, side, side, false);
+    }
+
+    private void setMenuFont() {
+        if (menuFontName != null) {
+            Font menuFont = null;
+            menuFontName = menuFontName.toLowerCase();
+
+            if (menuFontName.startsWith("system")) {
+                int size = Font.SIZE_MEDIUM;
+                int style = Font.STYLE_PLAIN;
+                int face = Font.FACE_PROPORTIONAL;
+                menuFontName = menuFontName.substring(6);
+                if (menuFontName.indexOf("small") != -1) {
+                    size = Font.SIZE_SMALL;
+                } else if (menuFontName.indexOf("large") != -1) {
+                    size = Font.SIZE_LARGE;
+                }
+
+                if (menuFontName.indexOf("bold") != -1) {
+                    style = Font.STYLE_BOLD;
+                } else if (menuFontName.indexOf("italic") != -1) {
+                    style = Font.STYLE_ITALIC;
+                }
+
+                if (menuFontName.indexOf("system") != -1) {
+                    face = Font.FACE_SYSTEM;
+                } else if (menuFontName.indexOf("mono") != -1) {
+                    face = Font.FACE_MONOSPACE;
+                }
+                menuFont = Font.createSystemFont(face, style, size);
+            } else {
+                menuFont = Font.getBitmapFont(menuFontName);
+            }
+
+            if (menuFont != null) {
+                getSoftButtonStyle().setFont(menuFont);
+                setSoftButtonStyle(getSoftButtonStyle());
+                getTitleStyle().setFont(menuFont);
+            }
+
+        }
+
     }
 }
 
