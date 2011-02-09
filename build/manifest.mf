@@ -1,4 +1,4 @@
-MIDlet-1: HelloWorld, , eu.kratochvil.rtm.nokia.HelloWorld
+MIDlet-1: NokiaRtm,/icon.png,eu.kratochvil.rtm.nokia.NokiaRtmMIDlet
 MIDlet-Vendor: Vendor
 MIDlet-Name: nokiartm
 MIDlet-Version: 1.0
