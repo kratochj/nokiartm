@@ -7,6 +7,7 @@ import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Font;
 import com.sun.lwuit.Form;
+import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
 import com.sun.lwuit.ToolkitHelper;
@@ -16,10 +17,13 @@ import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.FocusListener;
 
 import com.sun.lwuit.layouts.BoxLayout;
+import com.sun.lwuit.plaf.Border;
 import com.sun.lwuit.plaf.UIManager;
 import com.sun.lwuit.util.Log;
+import eu.kratochvil.rtm.nokia.components.InfiniteProgressIndicator;
 import eu.kratochvil.rtm.nokia.util.Asserts;
 import eu.kratochvil.rtm.nokia.util.LangUtils;
+import java.io.IOException;
 import javax.microedition.midlet.MIDlet;
 
 /**
@@ -29,6 +33,8 @@ import javax.microedition.midlet.MIDlet;
 public class MainForm extends Form implements FocusListener {
 
     static MainForm instance;
+    TodoList[] todos;
+    static public Form activeForm = null;
     /**
      * OK command without any action or command id (usable in dialogs).
      */
@@ -42,6 +48,10 @@ public class MainForm extends Form implements FocusListener {
             Application.exit(false);
         }
     };
+    private static Image newTaskImage = null;
+
+    private static final Command newTask = new Command("New task", newTaskImage);
+
     private static Command aboutCommand = new Command("About") {
 
         public void actionPerformed(ActionEvent evt) {
@@ -72,7 +82,11 @@ public class MainForm extends Form implements FocusListener {
     static final Command backToMainFormCommand = new Command("Back") {
 
         public void actionPerformed(ActionEvent event) {
-            showMainForm(false);
+            if (activeForm != null) {
+                activeForm.show();
+            } else {
+                showMainForm(false);
+            }
         }
     };
     static Command settingsCommand = new Command("Settings") {
@@ -144,8 +158,8 @@ public class MainForm extends Form implements FocusListener {
      */
     private static void setDefaultTransitions() {
         int type = CommonTransitions.SLIDE_HORIZONTAL;
-        instance.setTransitionInAnimator(CommonTransitions.createSlide(type, false, 550));
-        instance.setTransitionOutAnimator(CommonTransitions.createSlide(type, true, 550));
+        instance.setTransitionInAnimator(CommonTransitions.createSlide(type, true, 550));
+        instance.setTransitionOutAnimator(CommonTransitions.createSlide(type, false, 550));
         type = CommonTransitions.SLIDE_VERTICAL;
     }
 
@@ -179,28 +193,43 @@ public class MainForm extends Form implements FocusListener {
 //                showSendApplicationLog();
 //            }
 //            checkLifeSyncStatus();
+
+            instance.initApp();
         } catch (Throwable e) {
             handleAppError(e, null);
         }
         return MainForm.instance;
     }
 
+    public static void generateIcons() {
+        try {
+            newTaskImage = Image.createImage("/wait-circle.png");
+            
+        } catch (IOException e) {
+            Log.p("Error reading system icons" + e.getMessage(), Log.ERROR);
+        }
+    }
+    
+    public static void generateMenu(Form form) {
+        generateIcons();
+        form.addCommand(MainForm.newTask);
+        form.addCommand(MainForm.aboutCommand);
+        form.addCommand(MainForm.settingsCommand);
+        form.addCommand(MainForm.exitCommand);
+    }
+
     static void initAndShowMainForm() throws Exception {
 
-        final MainForm mainForm = new MainForm("Dashboard");
+        final MainForm mainForm = new MainForm("Remmember The Milk");
 
         mainForm.setMenuFont();
 
         final int width = Display.getInstance().getDisplayWidth();
 
-        mainForm.addCommand(exitCommand);
-        mainForm.addCommand(aboutCommand);
-        mainForm.addCommand(settingsCommand);
+        generateMenu(mainForm);
 
         MainForm.instance = mainForm;
         mainForm.show();
-
-
     }
 
     /**
@@ -348,6 +377,35 @@ public class MainForm extends Form implements FocusListener {
                 getTitleStyle().setFont(menuFont);
             }
 
+        }
+
+    }
+
+    public void initApp() {
+        try {
+            final Dialog progress = new Dialog();
+            progress.getDialogStyle().setBorder(Border.createRoundBorder(6, 6, 0xe3ef5a));
+            progress.setTransitionInAnimator(CommonTransitions.createSlide(CommonTransitions.SLIDE_VERTICAL, true, 400));
+            progress.addComponent(new Label("Please Wait"));
+            progress.addComponent(new InfiniteProgressIndicator(Image.createImage("/wait-circle.png")));
+            int height = Display.getInstance().getDisplayHeight() - (progress.getContentPane().getPreferredH() + progress.getTitleComponent().getPreferredH());
+            height /= 2;
+            progress.show(height, height, 20, 20, true, false);
+
+            new Thread() {
+
+                public void run() {
+                    todos = new TodoList[4];
+                    todos[0] = new TodoList(todos, 0, "Today");
+                    todos[1] = new TodoList(todos, 1, "Private");
+                    todos[2] = new TodoList(todos, 2, "Work");
+                    todos[3] = new TodoList(todos, 3, "Shoping List");
+                    progress.dispose();
+                    todos[0].show();
+                }
+            }.start();
+        } catch (IOException e) {
+            Log.p("IOException" + e.getMessage(), Log.ERROR);
         }
 
     }

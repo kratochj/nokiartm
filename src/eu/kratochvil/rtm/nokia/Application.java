@@ -23,6 +23,7 @@ public class Application {
     private static Application instance;
     private boolean started = false;
 
+    private List todos = new List();
 
 //    public void startApp() {
 //
